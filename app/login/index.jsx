@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity, StatusBar } from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import loginBg from "../../assets copy/images/loginbg.png";
+import loginBg from "../../assets/images/loginbg.png";
 import Colors from "../../constants/Colors";
 import { client } from "../../utils/KindeConfig";
 import {getData, storeData} from "../../utils/services";

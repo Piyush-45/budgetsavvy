@@ -1,51 +1,95 @@
 import { View, Text, StyleSheet } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import PieChart from 'react-native-pie-chart'
 import Colors from '../constants/Colors';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+export default function CircularChart({ categoryList }) {
 
-const CircularChart = () => {
   const widthAndHeight = 150;
-  const [values, setValues] = useState([1])
-  const [sliceColor, setSliceColor] = useState([Colors.GRAY])
+  const [values, setValues] = useState([1]);
+  const [sliceColor, setSliceColor] = useState([Colors.GRAY]);
+  const [totalCalculatedEstimate, setTotalCalculatestimate] = useState(0);
+  useEffect(() => {
+    categoryList && updateCircularChart();
+  }, [categoryList])
 
+
+  const updateCircularChart = () => {
+    let totalEsimates = 0;
+    setSliceColor([1]);
+    setValues([Colors.GRAY]);
+    let otherCost = 0;
+    categoryList.forEach((item, index) => {
+
+      if (index < 4) {
+        let itemTotalCost = 0;
+        item.CategoryItems?.forEach((item_) => {
+          itemTotalCost = itemTotalCost + item_.cost;
+          totalEsimates = totalEsimates + item_.cost;
+        })
+        setSliceColor(sliceColor => [...sliceColor, Colors.COLOR_LIST[index]]);
+        setValues(values => [...values, itemTotalCost])
+      }
+      else {
+        item.CategoryItems?.forEach((item_) => {
+          otherCost = otherCost + item_.cost;
+          totalEsimates = totalEsimates + item_.cost;
+
+        })
+      }
+
+    })
+    setTotalCalculatestimate(totalEsimates)
+    setSliceColor(sliceColor => [...sliceColor, Colors.COLOR_LIST[4]]);
+    setValues(values => [...values, otherCost])
+
+  }
   return (
-
-    <View style={styles.container}>
-      <Text style={{ fontSize: 20, marginBottom: 4, }}>Total Estimate : <Text style={{ fontWeight: 'bold' }}>0$</Text></Text>
-      <View >
-        <PieChart
+    <View style={styles.continer}>
+      <Text style={{
+        fontSize: 20,
+        fontFamily: 'outfit'
+      }}>Total Estimate : <Text style={{ fontFamily: 'outfit-bold' }}>${totalCalculatedEstimate}</Text></Text>
+      <View style={styles.subContainer}>
+        {categoryList?.length > 0 && <PieChart
           widthAndHeight={widthAndHeight}
+          series={values}
           sliceColor={sliceColor}
           coverRadius={0.65}
           coverFill={'#FFF'}
-          series={values}
-        />
-      </View>
-      <View style={{display:'flex', flexDirection:'row',alignItems:'center', gap:4 }}>
-        <MaterialCommunityIcons name='checkbox-blank-circle' size={20} color={Colors.GRAY} />
-        <Text style={{fontSize:20}}>NA</Text>
+        />}
+
+        {categoryList?.length == 0 ? <View style={styles.chartNameContainer}>
+          <MaterialCommunityIcons
+            name="checkbox-blank-circle"
+            size={24} color={Colors.GRAY} />
+          <Text>NA</Text>
+        </View>
+          : <View>
+            {categoryList?.map((category, index) => index <= 4 && (
+              <View key={index} style={styles.chartNameContainer}>
+                <MaterialCommunityIcons
+                  name="checkbox-blank-circle"
+                  size={24} color={Colors.COLOR_LIST[index]} />
+                <Text>{index < 4 ? category.name : 'Other'}</Text>
+              </View>
+            ))}
+          </View>}
       </View>
     </View>
-
   )
 }
 
-export default CircularChart
-
 const styles = StyleSheet.create({
-
-  container: {
-    width: wp(90),
-    marginTop: 12,
-    alignSelf: 'center',
+  continer: {
+    marginTop: 20,
     backgroundColor: Colors.WHITE,
     padding: 20,
     borderRadius: 15,
     elevation: 10,
-    // top:hp(10)
+    width:'90%',
+    alignSelf:'center'
   },
   subContainer: {
     marginTop: 10,
@@ -54,4 +98,6 @@ const styles = StyleSheet.create({
     gap: 40,
 
   },
+
+  chartNameContainer: { display: 'flex', flexDirection: 'row', gap: 5, alignItems: 'center' }
 })
